@@ -23,12 +23,14 @@ export class DataStorageService {
   }
 
   fetchRecipes() {
-    return this.http
-      .get<Recipe[]>('https://ng-course-recipe-book-78233.firebaseio.com/recipes.json')
+    return this.http.get<Recipe[]>('https://ng-course-recipe-book-78233.firebaseio.com/recipes.json')
       .pipe(
         map(recipes => {
           return recipes.map(recipe => {
-            return { ...recipe, ingredients: recipe.ingredients ? recipe.ingredients : [] };
+            return {
+              ...recipe,
+              ingredients: recipe.ingredients ? recipe.ingredients : []
+            };
           });
         }),
         tap(recipes => {
