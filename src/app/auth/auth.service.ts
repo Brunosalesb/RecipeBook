@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, tap } from 'rxjs/operators';
 import { throwError, BehaviorSubject } from 'rxjs';
+import { environment } from "../../environments/environment";
 
 import { User } from './user.model';
 
@@ -24,12 +25,15 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) { }
 
   signup(email: string, password: string) {
-    return this.http.post<AuthResponseData>('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyC_cYXyGSuDwuggb9vIj00aioDudAM2_VA', {
-      email: email,
-      password: password,
-      returnSecureToken: true
-    }
-    )
+    return this.http
+      .post<AuthResponseData>(
+        'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + environment.firebaseApiKey,
+        {
+          email: email,
+          password: password,
+          returnSecureToken: true
+        }
+      )
       .pipe(
         catchError(this.handleError),
         tap(resData => {
@@ -44,12 +48,15 @@ export class AuthService {
   }
 
   login(email: string, password: string) {
-    return this.http.post<AuthResponseData>('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyC_cYXyGSuDwuggb9vIj00aioDudAM2_VA', {
-      email: email,
-      password: password,
-      returnSecureToken: true
-    }
-    )
+    return this.http
+      .post<AuthResponseData>(
+        'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + environment.firebaseApiKey,
+        {
+          email: email,
+          password: password,
+          returnSecureToken: true
+        }
+      )
       .pipe(
         catchError(this.handleError),
         tap(resData => {
@@ -65,10 +72,10 @@ export class AuthService {
 
   autoLogin() {
     const userData: {
-      email: string,
-      id: string,
-      _token: string,
-      _tokenExpirationDate: string
+      email: string;
+      id: string;
+      _token: string;
+      _tokenExpirationDate: string;
     } = JSON.parse(localStorage.getItem('userData'));
     if (!userData) {
       return;
@@ -83,11 +90,12 @@ export class AuthService {
 
     if (loadedUser.token) {
       this.user.next(loadedUser);
-      const expirationDuration = new Date(userData._tokenExpirationDate).getTime() - new Date().getTime();
+      const expirationDuration =
+        new Date(userData._tokenExpirationDate).getTime() -
+        new Date().getTime();
       this.autoLogout(expirationDuration);
     }
   }
-
 
   logout() {
     this.user.next(null);
@@ -100,7 +108,6 @@ export class AuthService {
   }
 
   autoLogout(expirationDuration: number) {
-    console.log(expirationDuration);
     this.tokenExpirationTimer = setTimeout(() => {
       this.logout();
     }, expirationDuration);
